@@ -30,12 +30,18 @@ const characterModal = new bootstrap.Modal(modalElement);
 const modalName = document.getElementById('modal-name');
 const modalId = document.getElementById('modal-id');
 const modalImg = document.getElementById('modal-img');
-const modalTypes = document.getElementById('modal-types');
-const modalExp = document.getElementById('modal-exp');
+const modalFullName = document.getElementById('modal-fullname');
+const modalPowerstats = document.getElementById('modal-powerstats');
+const modalPlace = document.getElementById('modal-place');
+const modalBiography = document.getElementById('modal-biography');
+const modalAliases = document.getElementById('modal-aliases');
+const modalGender = document.getElementById('modal-gender');
+const modalRace = document.getElementById('modal-race');
 const modalHeight = document.getElementById('modal-height');
 const modalWeight = document.getElementById('modal-weight');
-const modalAbilities = document.getElementById('modal-abilities');
-const modalMoves = document.getElementById('modal-moves');
+const modalEyeColor = document.getElementById('modal-eyecolor');
+const modalHairColor = document.getElementById('modal-haircolor');
+const modalGroups = document.getElementById('modal-groups');
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
 
@@ -55,15 +61,21 @@ async function loadCatalog(searchQuery = '') {
   hideError();
 
   try {
-    // Define your search enpoint here.
-    const endpoint = '/api';
+    let endpoint = '/api';
+    if (searchQuery) {
+      endpoint = '/api/search?q=' + encodeURIComponent(searchQuery);
+    }
 
     const response = await fetch(endpoint);
-    if (response.status === 404) {
-      showError(`No character matched "${searchQuery}".`);
+    if (!response.ok) {
+      let msg = `Server responded with status ${response.status}`;
+      try {
+        const errData = await response.json();
+        if (errData.error) msg = errData.error;
+      } catch (e) {}
+      showError(msg);
       return;
     }
-    if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
 
     const data = await response.json();
     const list = Array.isArray(data) ? data : (data.results || []);
@@ -129,8 +141,7 @@ async function openDetail(identifier) {
   if (identifier === null || identifier === undefined) return;
 
   try {
-    // Set the enpoint for retrieving the information.
-    const response = await fetch(`/api`);
+    const response = await fetch(`/api/characters/${encodeURIComponent(identifier)}`);
 
     if (response.status === 404) {
       if (isModalOpen) characterModal.hide();
@@ -139,7 +150,12 @@ async function openDetail(identifier) {
     }
 
     if (!response.ok) {
-      throw new Error(`Server status ${response.status}`);
+      let msg = `Server status ${response.status}`;
+      try {
+        const errData = await response.json();
+        if (errData.error) msg = errData.error;
+      } catch (e) {}
+      throw new Error(msg);
     }
 
     const character = await response.json();
@@ -154,6 +170,54 @@ async function openDetail(identifier) {
   }
 }
 
+function formatValue(val) {
+  if (val === null || val === undefined) return 'Unknown';
+  if (Array.isArray(val)) {
+    const items = val.filter((item) => item && item !== '-');
+    if (items.length === 0) return 'Unknown';
+    return items.join(' / ');
+  }
+  const text = String(val).trim();
+  if (!text || text === '-') return 'Unknown';
+  return text;
+}
+
+function renderPowerstats(stats) {
+  modalPowerstats.innerHTML = '';
+  const keys = ['intelligence', 'strength', 'speed', 'durability', 'power', 'combat'];
+  keys.forEach((key) => {
+    let value = '-';
+    if (stats && stats[key] !== null && stats[key] !== undefined && stats[key] !== 'null') {
+      value = stats[key];
+    }
+
+    const num = Number(value);
+    const hasNum = value !== '-' && !Number.isNaN(num);
+    const percent = hasNum ? Math.min(100, Math.max(0, num)) : 0;
+
+    let color = 'bg-danger';
+    if (percent >= 70) color = 'bg-success';
+    else if (percent >= 40) color = 'bg-warning';
+
+    const col = document.createElement('div');
+    col.className = 'col-6';
+
+    const label = document.createElement('div');
+    label.className = 'd-flex justify-content-between small text-secondary';
+    label.innerHTML = `<span class="text-capitalize">${key}</span><span class="fw-bold">${hasNum ? num : '-'}</span>`;
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'progress powerstat-bar';
+    const bar = document.createElement('div');
+    bar.className = `progress-bar ${color}`;
+    bar.style.width = `${hasNum ? percent : 0}%`;
+    barWrap.appendChild(bar);
+
+    col.append(label, barWrap);
+    modalPowerstats.appendChild(col);
+  });
+}
+
 /**
  * Populate modal DOM elements with backend payload
  */
@@ -164,43 +228,37 @@ function populateModal(character) {
   modalImg.src = character.image || DEFAULT_IMAGE;
   modalImg.onerror = () => { modalImg.onerror = null; modalImg.src = DEFAULT_IMAGE; };
 
-  modalExp.textContent = character.experience ?? '-';
-  modalHeight.textContent = character.height ?? '-';
-  modalWeight.textContent = character.weight ?? '-';
+  modalFullName.textContent = formatValue(character.fullName);
+  modalPlace.textContent = formatValue(character.placeOfBirth);
+  modalBiography.textContent = formatValue(character.biography);
 
-  // Render Types
-  modalTypes.innerHTML = '';
-  (character.types || []).forEach((type) => {
-    const badge = document.createElement('span');
-    badge.className = 'badge bg-info text-uppercase px-3 py-2';
-    badge.textContent = type;
-    modalTypes.appendChild(badge);
-  });
+  renderPowerstats(character.powerstats);
 
-  // Render Abilities
-  modalAbilities.innerHTML = '';
-  (character.abilities || []).forEach((ability) => {
-    const badge = document.createElement('span');
-    badge.className = 'badge bg-secondary text-capitalize';
-    badge.textContent = ability;
-    modalAbilities.appendChild(badge);
-  });
+  modalGender.textContent = formatValue(character.gender);
+  modalRace.textContent = formatValue(character.race);
+  modalHeight.textContent = formatValue(character.height);
+  modalWeight.textContent = formatValue(character.weight);
+  modalEyeColor.textContent = formatValue(character.eyeColor);
+  modalHairColor.textContent = formatValue(character.hairColor);
+  modalGroups.textContent = formatValue(character.groupAffiliation);
 
-  // Render Moves
-  modalMoves.innerHTML = '';
-  const moves = character.moves || [];
-  if (moves.length === 0) {
-    modalMoves.innerHTML = '<span class="text-secondary small">No moves listed</span>';
+  modalAliases.innerHTML = '';
+  const aliases = Array.isArray(character.aliases) ? character.aliases : [];
+  if (aliases.length === 0) {
+    const span = document.createElement('span');
+    span.className = 'text-secondary small';
+    span.textContent = 'No aliases listed';
+    modalAliases.appendChild(span);
   } else {
-    moves.forEach((move) => {
+    aliases.forEach((alias) => {
       const badge = document.createElement('span');
-      badge.className = 'badge border border-secondary text-body-secondary text-capitalize';
-      badge.textContent = move;
-      modalMoves.appendChild(badge);
+      badge.className = 'badge bg-secondary-subtle text-secondary-emphasis text-capitalize';
+      badge.textContent = alias;
+      modalAliases.appendChild(badge);
     });
   }
 
-  // Bind Circular Navigation IDs provided by Backend
+  // Bind circular navigation
   currentPrevId = character.prevId ?? null;
   currentNextId = character.nextId ?? null;
 

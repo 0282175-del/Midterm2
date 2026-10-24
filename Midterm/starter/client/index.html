@@ -13,7 +13,7 @@
   <nav class="navbar navbar-expand-lg bg-secondary navbar-dark sticky-top shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#" id="brand-reset">
-        </span> -- Your app name ---
+        Superhero-pedia
       </a>
       <form class="d-flex" id="search-form" role="search">
         <div class="input-group">
@@ -67,22 +67,44 @@
         </div>
 
         <div class="modal-body p-4">
-          <div class="row align-items-center">
-            <!-- Left Column: Sprite & Types -->
+          <div class="row">
+            <!-- Left Column: Image & Aliases -->
             <div class="col-md-5 text-center mb-3 mb-md-0">
               <div class="sprite-wrapper p-3 rounded bg-body-tertiary border mb-3">
-                <img id="modal-img" src="" alt="Character Sprite" class="img-fluid characters-detail-img">
+                <img id="modal-img" src="" alt="Character Image" class="img-fluid characters-detail-img">
               </div>
-              <div id="modal-types" class="d-flex justify-content-center gap-2 flex-wrap"></div>
+              <div class="text-start">
+                <h6 class="fw-bold text-secondary mb-1">Aliases</h6>
+                <div id="modal-aliases" class="d-flex flex-wrap gap-1"></div>
+              </div>
             </div>
 
-            <!-- Right Column: Stats, Abilities, Moves, Characteristics, etc. -->
+            <!-- Right Column: Details -->
             <div class="col-md-7">
+              <h6 class="fw-bold text-secondary mb-1">Full Name</h6>
+              <p class="fw-bold mb-2" id="modal-fullname">-</p>
+
+              <h6 class="fw-bold text-secondary mb-1">Powerstats</h6>
+              <div id="modal-powerstats" class="row g-2 mb-3"></div>
+
+              <h6 class="fw-bold text-secondary mb-1">Place of birth</h6>
+              <p class="mb-2" id="modal-place">-</p>
+
+              <h6 class="fw-bold text-secondary mb-1">Biography</h6>
+              <p class="small mb-3" id="modal-biography">-</p>
+
+              <h6 class="fw-bold text-secondary mb-2">Appearance</h6>
               <div class="row g-2 text-center mb-3">
                 <div class="col-4">
                   <div class="p-2 border rounded bg-body-tertiary">
-                    <small class="text-secondary d-block">Age</small>
-                    <span class="fw-bold" id="modal-exp">-</span>
+                    <small class="text-secondary d-block">Gender</small>
+                    <span class="fw-bold" id="modal-gender">-</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 border rounded bg-body-tertiary">
+                    <small class="text-secondary d-block">Race</small>
+                    <span class="fw-bold" id="modal-race">-</span>
                   </div>
                 </div>
                 <div class="col-4">
@@ -97,17 +119,22 @@
                     <span class="fw-bold" id="modal-weight">-</span>
                   </div>
                 </div>
-              </div>
-              <!-- Add the details requested in your exercise. -->
-              <div class="mb-3">
-                <h6 class="fw-bold text-secondary mb-1">Features</h6>
-                <div id="modal-abilities" class="d-flex flex-wrap gap-1"></div>
+                <div class="col-4">
+                  <div class="p-2 border rounded bg-body-tertiary">
+                    <small class="text-secondary d-block">Eye-color</small>
+                    <span class="fw-bold" id="modal-eyecolor">-</span>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-2 border rounded bg-body-tertiary">
+                    <small class="text-secondary d-block">Hair-color</small>
+                    <span class="fw-bold" id="modal-haircolor">-</span>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <h6 class="fw-bold text-secondary mb-1">Characteristics</h6>
-                <div id="modal-moves" class="moves-scroll-box p-2 border rounded bg-body-tertiary d-flex flex-wrap gap-1"></div>
-              </div>
+              <h6 class="fw-bold text-secondary mb-1">Group affiliation</h6>
+              <p class="mb-0" id="modal-groups">-</p>
             </div>
           </div>
         </div>

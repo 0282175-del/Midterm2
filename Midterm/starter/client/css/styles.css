@@ -26,7 +26,6 @@
   object-fit: contain;
 }
 
-.moves-scroll-box {
-  max-height: 130px;
-  overflow-y: auto;
+.powerstat-bar {
+  height: 8px;
 }
